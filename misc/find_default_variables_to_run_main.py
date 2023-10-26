@@ -1,3 +1,7 @@
+from collections import defaultdict
+from pprint import pprint
+
+
 # Read the Python script into a list of lines
 with open('path/to/your/python_script.py', 'r') as f:
     code_lines = f.readlines()
@@ -27,5 +31,32 @@ for idx, line in enumerate(code_lines):
                     break
             if calling_function:
                 call_relationships[calling_function].append(function_name)
+
+
+# Function to print relationships in a hierarchical manner
+def print_hierarchical_relationships(call_relationships, function_name, level=0):
+    indent = '  ' * level
+    print(f"{indent}- {function_name}")
+    for callee in call_relationships.get(function_name, []):
+        print_hierarchical_relationships(call_relationships, callee, level + 1)
+
+# Pretty-print the call relationships
+print("Pretty-Printed Function Call Relationships:")
+pprint(call_relationships)
+print()
+
+# Print the hierarchical text format
+print("Hierarchical Function Call Relationships:")
+for root_function in call_relationships.keys():
+    print_hierarchical_relationships(call_relationships, root_function)
+This code snippet first uses pprint to display the call_relationships dictionary in a more readable format. After that, it uses the print_hierarchical_relationships function to display the relationships in a hierarchical manner.
+
+Just insert this snippet at the point in your code where you want to inspect the call_relationships dictionary. This should make it easier to understand the relationships between functions in your code.
+
+
+
+
+
+
 
 print(call_relationships)
