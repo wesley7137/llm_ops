@@ -1,14 +1,24 @@
-# Importing defaultdict from collections to properly initialize call_relationships.
-from collections import defaultdict
+# Read the Python script into a list of lines
+with open('path/to/your/python_script.py', 'r') as f:
+    code_lines = f.readlines()
 
-# Identifying the call relationships between functions again.
+# Initialize a dictionary to store function names and the line numbers where they are defined
+function_lines = {}
+
+# Loop through each line of code to find function definitions
+for idx, line in enumerate(code_lines):
+    line = line.strip()  # Remove leading and trailing whitespaces
+    if line.startswith("def "):
+        function_name = line.split('(')[0][4:]
+        function_lines[function_name] = idx
+
+# Your existing code starts here
+from collections import defaultdict
 call_relationships = defaultdict(list)
 
-# Loop through each line of code to find where functions are called.
 for idx, line in enumerate(code_lines):
     for function_name in function_lines.keys():
         if function_name + '(' in line:
-            # Identify which function this line belongs to, if any.
             calling_function = None
             for fn, line_num in function_lines.items():
                 if idx > line_num:
@@ -18,4 +28,4 @@ for idx, line in enumerate(code_lines):
             if calling_function:
                 call_relationships[calling_function].append(function_name)
 
-call_relationships
+print(call_relationships)
