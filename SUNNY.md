@@ -91,3 +91,81 @@ class VisionEncoder:
         self.model = SimpleCNN()
     def process_input(self, input_data):
         output = self.model(input_data
+      
+      
+      
+      
+      
+   LLM AND LSTM FEEDBACK LOOP
+   
+   import json
+import torch
+import torch.nn as nn
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer
+
+# Initialize the transformer-based language model
+model_name = "gpt2"  # Replace with your preferred transformer model
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+
+# Initialize the LSTM for analysis and processing
+lstm_input_size = ...  # Define input size based on language model output
+lstm_hidden_size = ...  # Define LSTM hidden state size
+lstm_layers = ...  # Number of LSTM layers
+
+lstm = nn.LSTM(lstm_input_size, lstm_hidden_size, num_layers=lstm_layers, batch_first=True)
+
+# Define a SentimentAnalysisLSTM class (as previously mentioned)
+class SentimentAnalysisLSTM(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, output_size):
+        super(SentimentAnalysisLSTM, self).__init__()
+        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_size, output_size)
+    
+    def forward(self, x):
+        out, _ = self.lstm(x)
+        out = self.fc(out[:, -1, :])  # Use only the final LSTM output for classification
+        return out
+
+# Define a function to collect user feedback
+def collect_feedback(dataset):
+    feedback = input("Was the response positive, negative, or neutral? ")
+    notes = input("Please include any notes on why it was good, bad, or neutral: ")
+    return {"sentiment": feedback, "explanation": notes}
+
+# Create an empty dataset in JSON format
+dataset = []
+
+while True:
+    user_input = input("User: ")
+    
+    # Pass user input through the language model
+    input_ids = tokenizer.encode(user_input, return_tensors="pt")
+    output = model.generate(input_ids, max_length=50, num_return_sequences=1, no_repeat_ngram_size=2)
+    response = tokenizer.decode(output[0], skip_special_tokens=True)
+    
+    print("Model:", response)
+    
+    # Collect user feedback
+    user_feedback = collect_feedback(dataset)
+    
+    # Append user input, model response, and feedback to the dataset
+    interaction = {
+        "user_input": user_input,
+        "model_output": response,
+        **user_feedback
+    }
+    
+    dataset.append(interaction)
+    
+    # Ask if the user wants to continue
+    continue_training = input("Do you want to continue training? (yes/no): ")
+    
+    if continue_training.lower() != "yes":
+        break
+
+# Save the dataset to a JSON file
+with open("user_model_interactions.json", "w") as json_file:
+    json.dump(dataset, json_file, indent=4)
+
+# Fine-tune the model with feedback (code for fine-tuning is omitted for brevity)
